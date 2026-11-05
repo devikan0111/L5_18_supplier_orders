@@ -20,6 +20,6 @@ Reports are in `*_report_before.txt` and `*_report_after.txt`.
 
 ## Commits
 
-1. Fix Bandit findings: parameterised SQL, remove os.system shell call, no silent except
-2. Fix Flake8 findings: line length and operator spacing
-3. Fix Pylint findings: snake_case names, docstrings, remove global state, main guard
+1. Fix Bandit findings
+2. Fix Flake8 findings
+3. Fix Pylint findings
