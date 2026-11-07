@@ -1,51 +1,71 @@
-# Lab 5: Static Code Analysis — Supplier Purchase Order Tracker
+# Lab 5: Static Code Analysis - Supplier Purchase Order Tracker
 
-**Your file:** `supplier_orders.py`
+**Name:** Devika N
+**SRN:** PES1UG24AM080
+**Course:** Software Engineering
 
-Follow the lab handout for the full instructions.
 
-## About the program
+## Problem Statement
 
-A purchase order tracker for a stores department. It places orders with suppliers, marks deliveries as received, notifies the warehouse and cleans up fulfilled orders.
+`supplier_orders.py` is a purchase order tracker for a stores department. It places orders with suppliers, marks deliveries as received, notifies the warehouse and cleans up fulfilled orders. It uses an in-memory SQLite database.
 
-The code works, but only just. It has quality, style and security problems of the kind Pylint, Flake8 and Bandit are built to find.
+## Repository contents
 
-## What to do
+| File | Description |
+|------|-------------|
+| `supplier_orders.py` | Cleaned and fixed version of the program |
+| `issues.md` | Table of all issues found, with line numbers, descriptions and fixes |
+| `pylint_report_before.txt` / `pylint_report_after.txt` | Pylint output before and after the fixes |
+| `flake8_report_before.txt` / `flake8_report_after.txt` | Flake8 output before and after the fixes |
+| `bandit_report_before.txt` / `bandit_report_after.txt` | Bandit output before and after the fixes |
 
-1. **Run it first** and read the output carefully:
-   ```bash
-   python supplier_orders.py
-   ```
-   It runs a short demonstration and may create a small output file in the current folder, so run it from a folder you don't mind adding files to.
+## How to run
 
-2. **Install the tools:**
-   ```bash
-   pip install pylint bandit flake8
-   ```
+```
+pip install pylint bandit flake8
+python supplier_orders.py
+pylint supplier_orders.py
+flake8 supplier_orders.py
+bandit -r supplier_orders.py
+```
 
-3. **Run the analysis** and save the reports:
-   ```bash
-   pylint supplier_orders.py > pylint_report.txt
-   bandit -r supplier_orders.py > bandit_report.txt
-   flake8 supplier_orders.py > flake8_report.txt
-   ```
+Expected output of the program:
 
-4. **Document the issues** in `issues.md` using this table (at least 4 rows, high and medium severity first):
+```
+notifying warehouse about Acme
+1 540
+```
 
-   | Issue | Type | Line(s) | Description | Fix Approach |
-   |-------|------|---------|-------------|--------------|
-   | ... | ... | ... | ... | ... |
+## Results
 
-5. **Fix the code.** Fix at least 4 of the issues you documented, then rerun all three tools to confirm they are gone. Repeat until you are satisfied. The program should still do its job when you are done.
+| Tool | Before | After |
+|------|--------|-------|
+| Pylint | 2.41 / 10 | 10.00 / 10 |
+| Bandit | 1 High, 1 Medium, 1 Low | 0 issues |
+| Flake8 | 4 findings | 0 findings |
 
-6. **Reflect.** Answer the four reflection questions from the handout in `reflection.md`.
+## Issues found and fixed
 
-## Deliverables
+The full table, with line numbers, is in [`issues.md`](issues.md).
 
-1. `supplier_orders.py`: your cleaned version, with at least 4 issues fixed.
-2. `issues.md`: the completed issue table.
-3. `reflection.md`: your answers to the reflection questions.
+**Security (Bandit)**
+- **B605 (High):** `os.system("echo ... " + supplier)` ran through a shell, so a supplier name like `x; rm -rf ~` would execute as a command. The shell call was removed.
+- **B608 (Medium):** the INSERT query was built with string formatting, which breaks on names like `O'Brien` and allows SQL injection. It now uses a parameterised query with `?` placeholders.
+- **B110 (Low):** `except Exception: pass` silently hid every failure. It now catches only `sqlite3.Error` and logs it with `logging.exception`.
 
-**Target:** aim for a Pylint score above 9.5 on your final file. A perfect 10.00/10 is very good.
+**Design and bugs (Pylint)**
+- Removed module-level `global` state. The database connection is now created in `create_connection()` and passed to each function, and the order total is a local variable in `main()`.
+- Removed the unused `remarks` argument of `mark_received`.
+- Added an `if __name__ == "__main__":` guard so importing the file no longer runs the demo.
 
-Be ready to explain the bugs you found and how you fixed them. You may be called on to present.
+**Style (Pylint and Flake8)**
+- Renamed camelCase functions to snake_case (`placeOrder` to `place_order`, and so on).
+- Added a module docstring and a docstring for every function.
+- Split lines longer than 79 characters and fixed spacing around operators.
+
+
+## Commit history
+
+1. Fix Bandit findings
+2. Fix Flake8 findings
+3. Fix Pylint findings
